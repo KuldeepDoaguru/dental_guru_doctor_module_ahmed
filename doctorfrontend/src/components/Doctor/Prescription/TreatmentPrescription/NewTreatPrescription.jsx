@@ -11,7 +11,7 @@ import cogoToast from "cogo-toast";
 
 const NewTreatPrescription = () => {
   const { tsid, id, appoint_id, tpid, sitting, treatment } = useParams();
-  console.log(appoint_id, id, tpid, treatment);
+  console.log(tpid, tsid);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,13 @@ const NewTreatPrescription = () => {
   const getTreatmentList = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:8888/api/doctor/getExaminedataByIdandexamine/${tsid}/${tpid}`
+        `http://localhost:8888/api/doctor/getExaminedataByIdandexamine/${tsid}/${tpid}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       console.log(data);
       setTreatments(data);
@@ -59,7 +65,7 @@ const NewTreatPrescription = () => {
     }
   };
 
-  console.log(treatments[0]?.disease);
+  console.log(treatments);
 
   // Get Patient Details START
   const getPatientDetail = async () => {
@@ -639,12 +645,12 @@ const NewTreatPrescription = () => {
                   <th>Dental Treatment</th>
                   <th>Teeth</th>
                   <th>Teeth Quantity</th>
-                  <th>Cost</th>
+                  {/* <th>Cost</th>
                   <th>Total Cost</th>
                   <th>Discount %</th>
                   <th>Net Amount</th>
                   <th>Paid Amount</th>
-                  <th>Pending Amount</th>
+                  <th>Pending Amount</th> */}
                   <th>Note</th>
                 </tr>
               </thead>
@@ -657,14 +663,14 @@ const NewTreatPrescription = () => {
                       <td>{item.dental_treatment}</td>
                       <td>{item.no_teeth}</td>
                       <td>{item.qty}</td>
-                      <td>{item.cost_amt}</td>
+                      {/* <td>{item.cost_amt}</td>
                       <td>{item.total_amt}</td>
                       <td>{item.disc_amt}</td>
                       <td>{item.net_amount}</td>
                       <td>
                         {Number(item.sec_rec_amt) + Number(item.dir_rec_amt)}
                       </td>
-                      <td>{item.pending_amount}</td>
+                      <td>{item.pending_amount}</td> */}
                       <td>{item.note}</td>
                     </tr>
                   </>

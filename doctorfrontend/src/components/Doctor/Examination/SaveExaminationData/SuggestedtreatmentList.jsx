@@ -65,7 +65,13 @@ const SuggestedtreatmentList = ({ tpid, getPatientData }) => {
 
       if (confirmed) {
         const res = await axios.delete(
-          `http://localhost:8888/api/doctor/deleteTreatSuggestion/${id}/${branch}`
+          `http://localhost:8888/api/doctor/deleteTreatSuggestion/${id}/${branch}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
         console.log(res.data);
         dispatch(toggleTableRefresh());

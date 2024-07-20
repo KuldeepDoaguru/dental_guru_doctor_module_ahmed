@@ -206,7 +206,8 @@ const AppointTable = () => {
           return (
             item.appoint_id === appointId &&
             item.tp_id === tpid &&
-            item.package_status !== null
+            item.package_status !== null &&
+            item.treatment_provided !== "OPD"
           );
         });
 
@@ -547,7 +548,8 @@ const AppointTable = () => {
                                 <td>
                                   <small>
                                     {item.treatment_status === "completed" ||
-                                    item.treatment_status === null
+                                    item.treatment_status === null ||
+                                    item.treatment_provided === "OPD"
                                       ? item.treatment_provided
                                       : item.treatment_names}
                                   </small>

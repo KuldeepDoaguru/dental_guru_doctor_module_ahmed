@@ -8,6 +8,7 @@ import EditAppointment from "./BookSittingAppointment";
 import { toggleTableRefresh } from "../../../redux/user/userSlice";
 import SuggestedtreatmentList from "../Examination/SaveExaminationData/SuggestedtreatmentList";
 import cogoToast from "cogo-toast";
+import { IoMdAdd } from "react-icons/io";
 
 const TreatSuggest = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const TreatSuggest = () => {
   const user = useSelector((state) => state.user);
   const branch = user.currentUser.branch_name;
   const employeeName = user.currentUser.employee_name;
+  const [otherMed, setOtherMed] = useState("");
   const token = user.currentUser.token;
   console.log(branch);
   const { id, tpid } = useParams();
@@ -28,8 +30,10 @@ const TreatSuggest = () => {
   const [treatments, setTreatments] = useState([]);
   const [getLabData, setGetLabData] = useState([]);
   const [getPatientData, setGetPatientData] = useState([]);
+  const [getTreatData, setGetTreatData] = useState([]);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [procedureTreat, setProcedureTreat] = useState([]);
+  const [medicineOptions, setMedicineOptions] = useState([]);
   const [data, setData] = useState([]);
   const [value, setValue] = useState(0);
   const [treatList, setTreatList] = useState([]);
@@ -43,6 +47,17 @@ const TreatSuggest = () => {
     treatment_name: "",
     total_sitting: "",
     total_cost: "",
+  });
+  const [prescriptionData, setPrescriptionData] = useState({
+    branch_name: branch,
+    patient_uhid: "",
+    disease: "",
+    treatment: "",
+    medicine_name: "",
+    dosage: "",
+    frequency: "",
+    duration: "",
+    note: "",
   });
 
   console.log(getPatientData);
@@ -66,6 +81,11 @@ const TreatSuggest = () => {
         total_cost: treatment?.treatment_cost,
       };
     });
+  };
+
+  const handleChangeMed = (e) => {
+    const { name, value } = e.target;
+    setPrescriptionData({ ...prescriptionData, [name]: value });
   };
 
   const updateAppointmentData = async () => {
@@ -481,6 +501,125 @@ const TreatSuggest = () => {
 
   console.log(treatList.length);
 
+  const generatePres = () => {
+    navigate(`/prescription-generate/${tpid}`);
+  };
+
+  const getTreatDetails = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:8888/api/doctor/getTreatmentDataList/${tpid}/${branch}`
+      );
+      setGetTreatData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchMedicineOptions = async () => {
+    try {
+      const { data } = await axios.get(
+        "http://localhost:8888/api/doctor/getMedicineData",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setMedicineOptions(data);
+    } catch (error) {
+      console.error("Error fetching medicine options:", error);
+    }
+  };
+
+  useEffect(() => {
+    getTreatDetails();
+    fetchMedicineOptions();
+  }, []);
+
+  console.log(getTreatData);
+
+  const addNewMedicine = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:8888/api/doctor/purchaseInventory/${branch}`,
+        {
+          item_name: otherMed,
+          item_category: "drugs",
+          branch_name: branch,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+      // setLoading(false);
+      cogoToast.success("New medicine added successfully");
+    } catch (error) {
+      // setLoading(false);
+      console.log(error);
+    }
+  };
+
+  console.log(prescriptionData);
+
+  const medicineInput = {
+    branch_name: branch,
+    patient_uhid: getPatientData[0]?.uhid,
+    disease: prescriptionData?.disease,
+    treatment: prescriptionData?.treatment,
+    medicine_name:
+      prescriptionData?.medicine_name === "other"
+        ? otherMed
+        : prescriptionData?.medicine_name,
+    dosage: prescriptionData?.dosage,
+    frequency: prescriptionData?.frequency,
+    duration: prescriptionData?.duration,
+    note: prescriptionData?.note,
+  };
+
+  console.log(medicineInput);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `http://localhost:8888/api/doctor/insertTreatPrescriptionQuick/${tpid}`,
+        medicineInput,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      setLoading(false);
+      addNewMedicine();
+      // timelineForMedical();
+      // getTreatPrescriptionByAppointId();
+      setPrescriptionData({
+        disease: "",
+        treatment: "",
+        medicine_name: "",
+        dosage: "",
+        frequency: "",
+        duration: "",
+        note: "",
+      });
+    } catch (error) {
+      setLoading(false);
+      console.error("Error:", error.response.data);
+      cogoToast.error("Error:", error.response.data);
+      // Handle error, maybe show an error message
+    }
+  };
+
   return (
     <>
       <Wrapper>
@@ -859,16 +998,217 @@ const TreatSuggest = () => {
             </div>
           </div>
 
+          {/* Medicine section starts */}
+          <div className="container">
+            <h2>Medicine Details</h2>
+            <div className="row shadow-sm p-3 mb-3 bg-body rounded">
+              <form onSubmit={handleSubmit}>
+                <div className="row">
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div className="form-outline">
+                      <label>Treatment</label>
+                      <select
+                        className="form-select w-100"
+                        name="treatment"
+                        aria-label="Default select example"
+                        onChange={handleChangeMed}
+                        value={prescriptionData.treatment}
+                      >
+                        <option value="">-select treatment-</option>
+                        {getTreatData.map((item, index) => (
+                          <option key={index} value={item.treatment_name}>
+                            {item.treatment_name}
+                          </option>
+                        ))}
+                      </select>
+                      {/* <input
+                        type="text"
+                        // value={treatment}
+                        readOnly
+                        className="rounded"
+                        required
+                      /> */}
+                    </div>
+                  </div>
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div className="form-outline">
+                      <label>disease</label>
+                      <select
+                        name="disease"
+                        onChange={handleChangeMed}
+                        required
+                        id=""
+                        className="form-select text-start w-100"
+                      >
+                        <option value="">-select disease-</option>
+                        {uniqueDiseases.map((item, index) => (
+                          <option key={index} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div className="form-outline">
+                      <label>Medicine Name</label>
+
+                      <select
+                        className={`form-select w-100`}
+                        name="medicine_name"
+                        aria-label="Default select example"
+                        onChange={handleChangeMed}
+                        required
+                        // value={prescriptionData.medicine_name}
+                      >
+                        <option value="">-select medicine-</option>
+                        <option value="other">-other medicine-</option>
+                        {medicineOptions.map((item, index) => (
+                          <option key={index} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {prescriptionData?.medicine_name === "other" && (
+                    <>
+                      <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                        <label>Other Medicine</label>
+                        <input
+                          type="text"
+                          placeholder="other medicine"
+                          className="form-control"
+                          required
+                          name="otherMed"
+                          value={otherMed}
+                          onChange={(e) => setOtherMed(e.target.value)}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div data-mdb-input-init className="form-outline">
+                      <label>Dosage</label>
+                      {prescriptionData?.medicine_name !== "" && (
+                        <input
+                          type="text"
+                          id="dosage"
+                          placeholder="dosage"
+                          className="form-control"
+                          required
+                          name="dosage"
+                          value={prescriptionData?.dosage}
+                          onChange={handleChangeMed}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div data-mdb-input-init className="form-outline">
+                      <label>Frequency</label>
+                      {prescriptionData?.medicine_name !== "" && (
+                        <>
+                          <select
+                            id="frequency"
+                            className="form-control"
+                            name="frequency"
+                            required
+                            value={prescriptionData?.frequency}
+                            onChange={handleChangeMed}
+                          >
+                            <option value="">Choose frequency</option>
+                            <option value="1-1-1(TDS)">1-1-1(TDS)</option>
+                            <option value="1-1-0(BD)">1-1-0(BD)</option>
+                            <option value="0-1-1(BD)">0-1-1(BD)</option>
+                            <option value="1-0-1(BD)">1-0-1(BD)</option>
+                            <option value="0-0-1(HS)">0-0-1(HS)</option>
+                            <option value="0-1-0(OD)">0-1-0(OD)</option>
+                            <option value="1-0-0(BM)">1-0-0(BM)</option>
+                            <option value="SOS">SOS</option>
+                          </select>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div data-mdb-input-init className="form-outline">
+                      <label>Duration</label>
+                      {prescriptionData?.medicine_name !== "" && (
+                        <>
+                          <select
+                            id="duration"
+                            className="form-control"
+                            name="duration"
+                            required
+                            value={prescriptionData.duration}
+                            onChange={handleChangeMed}
+                          >
+                            <option value="">Choose duration</option>
+                            <option value="1 day">1 day</option>
+                            <option value="2 days">2 days</option>
+                            <option value="3 days">3 days</option>
+                            <option value="4 days">4 days</option>
+                            <option value="5 days">5 days</option>
+                            <option value="6 days">6 days</option>
+                            <option value="1 week">1 week</option>
+                            <option value="2 weeks">2 weeks</option>
+                            <option value="3 weeks">3 weeks</option>
+                            <option value="1 Month">1 Month</option>
+                            <option value="3 Months">3 Months</option>
+                          </select>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-xxl-4 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div data-mdb-input-init className="form-outline">
+                      <label>Note</label>
+                      <textarea
+                        type="text"
+                        id="note"
+                        className="form-control"
+                        placeholder="write note"
+                        name="note"
+                        value={prescriptionData?.note}
+                        onChange={handleChangeMed}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div className="d-flex justify-content-center align-items-center h-100">
+                      <button
+                        className="btn btn-secondary fs-5 mt-4 text-white shadow"
+                        style={{
+                          backgroundColor: "#0dcaf0",
+                          border: "#0dcaf0",
+                        }}
+                        type="submit"
+                        disabled={loading}
+                      >
+                        {loading ? "Add..." : "Add"}
+                        <IoMdAdd size={20} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
           <div className="d-flex justify-content-center align-items-center">
             {treatList.length > 0 ? (
               <>
-                {/* <button
+                <button
                   type="button"
                   className="btn btn-info text-light shadow fw-bold"
-                  onClick={handleCollect}
+                  onClick={generatePres}
                 >
-                  Collect Security Money
-                </button> */}
+                  Generate Prescription
+                </button>
                 <button
                   className="btn btn-info text-light mx-2 shadow fw-bold"
                   onClick={handleChangePage}
@@ -878,13 +1218,13 @@ const TreatSuggest = () => {
               </>
             ) : (
               <>
-                {/* <button
+                <button
                   type="button"
                   className="btn btn-info text-light shadow fw-bold"
                   disabled
                 >
-                  Collect Security Money
-                </button> */}
+                  Generate Prescription
+                </button>
                 <button
                   className="btn btn-info text-light mx-2 shadow fw-bold"
                   disabled

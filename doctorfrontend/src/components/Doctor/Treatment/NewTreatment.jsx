@@ -303,7 +303,7 @@ const NewTreatment = () => {
                   .map((item) => (
                     <>
                       <tr>
-                        <td>{item.date}</td>
+                        <td>{item?.date?.split(" ")[0]}</td>
                         <td>{item.treatment_name}</td>
                         <td>{item.disease}</td>
                         <td>{item.selected_teeth}</td>

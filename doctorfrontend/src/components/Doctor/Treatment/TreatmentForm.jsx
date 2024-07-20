@@ -82,7 +82,12 @@ const TreatmentForm = () => {
         endpoint = `http://localhost:8888/api/doctor/getExaminedataByIdandexamine/${tsid}/${tp_id}`;
       }
 
-      const { data } = await axios.get(endpoint);
+      const { data } = await axios.get(endpoint, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       console.log(data);
       setTreatments(data);
@@ -380,7 +385,7 @@ const TreatmentForm = () => {
   console.log(pendingAmountValue, secRecValue);
 
   console.log(lastTreatment?.current_sitting);
-  console.log(lastTreatment?.disc_amt);
+  console.log(lastTreatment);
 
   const formDetails = {
     branch: branch,
@@ -841,7 +846,7 @@ const TreatmentForm = () => {
                       />
                     </div>
                   </div>
-                  <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
+                  {/* <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Treatment cost per tooth
@@ -855,8 +860,8 @@ const TreatmentForm = () => {
                         onChange={handleChange}
                       />
                     </div>
-                  </div>
-                  <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
+                  </div> */}
+                  {/* <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Total Treatment Cost
@@ -870,8 +875,8 @@ const TreatmentForm = () => {
                         // onChange={handleChange}
                       />
                     </div>
-                  </div>
-                  <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-sm-12 col-12">
+                  </div> */}
+                  {/* <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Discount %{" "}
@@ -909,8 +914,8 @@ const TreatmentForm = () => {
                         </>
                       )}
                     </div>
-                  </div>
-                  {lastTreatment?.current_sitting <= 1 ? (
+                  </div> */}
+                  {/* {lastTreatment?.current_sitting <= 1 ? (
                     ""
                   ) : (
                     <>
@@ -925,33 +930,14 @@ const TreatmentForm = () => {
                         </p>
                       </div>
                     </>
-                  )}
+                  )} */}
 
-                  <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-sm-12 col-12">
+                  {/* <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Paid Amount
                       </label>
 
-                      {/* <input
-                        type="text"
-                        required
-                        name="net_amt"
-                        className="shadow-none p-1 bg-light rounded border-0 w-75"
-                        value={
-                          lastTreatment?.totalCost &&
-                          dataArray?.length &&
-                          formData.disc_amt
-                            ? lastTreatment?.totalCost * dataArray?.length -
-                              (lastTreatment?.totalCost *
-                                dataArray?.length *
-                                formData.disc_amt) /
-                                100
-                            : ""
-                        }
-                        placeholder="Net Amount"
-                        onChange={handleChange}
-                      /> */}
                       {showDirect ? (
                         <input
                           type="number"
@@ -985,8 +971,8 @@ const TreatmentForm = () => {
                           : lastTreatment?.pending_amount - secRecValue}
                       </small>
                     </div>
-                  </div>
-                  <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
+                  </div> */}
+                  <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Notes
@@ -1001,7 +987,7 @@ const TreatmentForm = () => {
                       />
                     </div>
                   </div>
-                  <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
+                  {/* <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Remaining Security Amount :{" "}
@@ -1045,8 +1031,8 @@ const TreatmentForm = () => {
                         )}
                       </div>
                     </div>
-                  </div>
-                  <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+                  </div> */}
+                  {/* <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         {!showDirect || partPay > 0
@@ -1112,7 +1098,6 @@ const TreatmentForm = () => {
                             {" "}
                             <option value="">-select-</option>
                             <option value="Received">Yes</option>
-                            {/* <option value="Pending">No</option> */}
                           </>
                         ) : (
                           <>
@@ -1133,7 +1118,7 @@ const TreatmentForm = () => {
                         )}
                       </select>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
               <hr />

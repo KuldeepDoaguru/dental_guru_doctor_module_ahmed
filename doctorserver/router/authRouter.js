@@ -107,6 +107,8 @@ const {
   getPatBills,
   getChiefComplain,
   addChiefComplainTOList,
+  getTreatmentDataList,
+  insertTreatPrescriptionQuick,
 } = require("../controller/authTreatment.js");
 const {
   uploadImage,
@@ -559,5 +561,10 @@ router.delete("/deleteLabTestSuggest/:tid", deleteLabTestSuggest);
 router.put("/updateAppointmentPath/:appoint_id/:branch", updateAppointmentPath);
 router.get("/getChiefComplain", getChiefComplain);
 router.post("/addChiefComplainTOList", addChiefComplainTOList);
+router.get("/getTreatmentDataList/:tpid/:branch", getTreatmentDataList);
+router.post(
+  "/insertTreatPrescriptionQuick/:tpid",
+  insertTreatPrescriptionQuick
+);
 
 module.exports = { authRoutes: router };

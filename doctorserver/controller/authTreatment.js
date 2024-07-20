@@ -257,6 +257,7 @@ const deleteTreatmentData = (req, res) => {
 };
 
 const insertTreatPrescription = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   const { appoint_id, tpid } = req.params;
   const sitting = req.params.sitting;
   const {
@@ -272,7 +273,7 @@ const insertTreatPrescription = (req, res) => {
   } = req.body;
 
   const sql =
-    "INSERT INTO dental_prescription (appoint_id, tp_id, branch_name, patient_uhid, desease, treatment, sitting_number, medicine_name, dosage, frequency, duration, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?)";
+    "INSERT INTO dental_prescription (appoint_id, tp_id, branch_name, patient_uhid, desease, treatment, sitting_number, medicine_name, dosage, frequency, duration, note, data) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?, ?)";
 
   db.query(
     sql,
@@ -289,6 +290,7 @@ const insertTreatPrescription = (req, res) => {
       frequency,
       duration,
       note,
+      dateTime,
     ],
     (err, result) => {
       if (err) {
@@ -1055,6 +1057,70 @@ const addChiefComplainTOList = (req, res) => {
   }
 };
 
+const getTreatmentDataList = (req, res) => {
+  const tpid = req.params.tpid;
+  const branch = req.params.branch;
+
+  const sql = `SELECT * FROM treat_suggest LEFT JOIN dental_examination ON dental_examination.tp_id = treat_suggest.tp_id WHERE treat_suggest.tp_id = ? AND treat_suggest.branch_name = ?`;
+
+  db.query(sql, [tpid, branch], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res
+        .status(400)
+        .json({ success: false, message: "Error retrieving treatment data" });
+    } else {
+      return res.status(200).send(results);
+    }
+  });
+};
+
+const insertTreatPrescriptionQuick = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
+  const tpid = req.params.tpid;
+  const {
+    branch_name,
+    patient_uhid,
+    disease,
+    treatment,
+    medicine_name,
+    dosage,
+    frequency,
+    duration,
+    note,
+  } = req.body;
+
+  const sql =
+    "INSERT INTO dental_prescription (tp_id, branch_name, patient_uhid, desease, treatment, medicine_name, dosage, frequency, duration, note, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?,?)";
+
+  db.query(
+    sql,
+    [
+      tpid,
+      branch_name,
+      patient_uhid,
+      disease,
+      treatment,
+      medicine_name,
+      dosage,
+      frequency,
+      duration,
+      note,
+      dateTime,
+    ],
+    (err, result) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        res.status(200).json({
+          message: "Prescription inserted successfully",
+          id: result.insertId,
+        });
+      }
+    }
+  );
+};
+
 module.exports = {
   getTreatmentList,
   insertTreatmentData,
@@ -1091,4 +1157,6 @@ module.exports = {
   getPatBills,
   getChiefComplain,
   addChiefComplainTOList,
+  getTreatmentDataList,
+  insertTreatPrescriptionQuick,
 };

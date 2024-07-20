@@ -1,8 +1,10 @@
 const express = require("express");
 const db = require("../connect.js");
 const { getBranch } = require("./authBranch.js");
+const moment = require("moment-timezone");
 
 const dentalPediatric = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   const data = req.body;
 
   const selectQuery =
@@ -24,7 +26,7 @@ const dentalPediatric = (req, res) => {
 
     // If the disease does not exist, insert a new row
     const insertQuery =
-      "INSERT INTO dental_examination (appointment_id, tp_id, branch_name, patient_uhid, selected_teeth, disease, chief_complain, advice, on_examination, diagnosis_category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      "INSERT INTO dental_examination (appointment_id, tp_id, branch_name, patient_uhid, selected_teeth, disease, chief_complain, advice, on_examination, diagnosis_category, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     const values = [
       data.appointment_id,
       data.tpid,
@@ -36,6 +38,7 @@ const dentalPediatric = (req, res) => {
       data.advice,
       data.onExamination,
       data.diagnosis_category,
+      dateTime,
     ];
 
     db.query(insertQuery, values, (err, result) => {
@@ -169,6 +172,7 @@ const deleteDentalPediatric = (req, res) => {
 };
 
 const insertTreatSuggest = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   const {
     appoint_id,
     branch,

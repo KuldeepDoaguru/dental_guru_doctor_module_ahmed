@@ -35,6 +35,7 @@ import animationData from "./animation/animation-four.json";
 import Lottie from "lottie-react";
 import PrescriptionDetails from "./pages/DoctorPage/PrescriptionDetails";
 import ViewTreatPrescriptionList from "./components/Doctor/Prescription/TreatmentPrescription/ViewTreatPrescriptionList";
+import PrescriptionQuick from "./pages/DoctorPage/PrescriptionQuick";
 
 function App() {
   const navigate = useNavigate();
@@ -562,28 +563,7 @@ function App() {
             )
           }
         />
-        {/* <Route
-          path="/CreatePrescrip"
-          element={
-            user === null ? (
-              <DoctorLogin />
-            ) : loading ? (
-              <>
-                {" "}
-                <Lottie
-                  options={defaultOptions}
-                  height={300}
-                  width={400}
-                  style={{ background: "transparent" }}
-                ></Lottie>
-              </>
-            ) : todayAttendance.length === 0 ? (
-              <AttendanceLeave />
-            ) : (
-              <CreatePrescrip />
-            )
-          }
-        /> */}
+
         <Route
           path="/profileDashboard"
           element={
@@ -743,12 +723,30 @@ function App() {
           }
         />
 
-        {/* ****************** Doctor Routes End Here ******************* */}
+        <Route
+          path="/prescription-generate/:tpid"
+          element={
+            user === null ? (
+              <DoctorLogin />
+            ) : loading ? (
+              <>
+                {" "}
+                <Lottie
+                  options={defaultOptions}
+                  height={300}
+                  width={400}
+                  style={{ background: "transparent" }}
+                ></Lottie>
+              </>
+            ) : todayAttendance.length === 0 ? (
+              <AttendanceLeave />
+            ) : (
+              <PrescriptionQuick />
+            )
+          }
+        />
 
-        {/* <Route path="/receptionist_login" element={<Login />} />
-      <Route path="/receptionist_registration" element={<Registration />} />
-      <Route path="/superadmin-dashboard" element={<Dashboard />} />
-      <Route path="/UniversalLogin" element={<UniversalLogin />} /> */}
+        {/* ****************** Doctor Routes End Here ******************* */}
       </Routes>
     </>
   );
