@@ -519,7 +519,7 @@ const getFilteredTreat = (req, res) => {
     const tpid = req.params.tpid;
     const branch = req.params.branch;
     const getQuery =
-      "SELECT * FROM treat_suggest JOIN dental_examination on treat_suggest.tp_id = dental_examination.tp_id WHERE treat_suggest.tp_id = ? AND branch_name = ?";
+      "SELECT * FROM treat_suggest JOIN dental_examination on treat_suggest.tp_id = dental_examination.tp_id WHERE treat_suggest.tp_id = ? AND treat_suggest.branch_name = ?";
 
     db.query(getQuery, [tpid, branch], (err, results) => {
       if (err) {
@@ -537,7 +537,7 @@ const updateTreatSittingStatus = (req, res) => {
   try {
     const tsid = req.params.tsid;
     const branch = req.params.branch;
-    const treatment_status = req.body;
+    const { treatment_status } = req.body;
 
     const sql = `UPDATE treat_suggest SET treatment_status = ? WHERE ts_id = ? AND branch_name = ?`;
 

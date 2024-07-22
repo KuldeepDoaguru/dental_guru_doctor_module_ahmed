@@ -22,6 +22,7 @@ const getTreatmentList = (req, res) => {
 };
 
 const insertTreatmentData = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   const examId = req.params.exam_id;
   const tpid = req.params.tpid;
   const appointmentId = req.params.appointment_id;
@@ -48,7 +49,7 @@ const insertTreatmentData = (req, res) => {
   try {
     // Insert treatment details into the database
     db.query(
-      "INSERT INTO dental_treatment (exam_id, tp_id, branch_name, appointment_id, sitting_number, patient_uhid, dental_treatment, no_teeth, qty, cost_amt, disc_amt, total_amt, net_amount, paid_amount, pending_amount, dir_rec_amt, sec_rec_amt, dir_rec_doctor_id,sitting_payment_status, note) VALUES (?,?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?, ?)",
+      "INSERT INTO dental_treatment (exam_id, tp_id, branch_name, appointment_id, sitting_number, patient_uhid, dental_treatment, no_teeth, qty, cost_amt, disc_amt, total_amt, net_amount, paid_amount, pending_amount, dir_rec_amt, sec_rec_amt, dir_rec_doctor_id,sitting_payment_status, note, date) VALUES (?,?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?, ?, ?)",
       [
         examId,
         tpid,
@@ -70,6 +71,7 @@ const insertTreatmentData = (req, res) => {
         dir_rec_doctor_id,
         sitting_payment_status,
         note,
+        dateTime,
       ],
       (error, result) => {
         if (error) {
@@ -556,6 +558,7 @@ const getTreatmentDataViaBranchAndTpid = (req, res) => {
 };
 
 const generateFinalBillwithTpid = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   try {
     const {
       uhid,
@@ -568,6 +571,7 @@ const generateFinalBillwithTpid = (req, res) => {
       total_amount,
       paid_amount,
       pay_by_sec_amt,
+      payment_status,
     } = req.body;
     const selectQuery = "SELECT * FROM patient_bills WHERE tp_id = ?";
     db.query(selectQuery, tp_id, (err, result) => {
@@ -575,7 +579,7 @@ const generateFinalBillwithTpid = (req, res) => {
         return res.status(400).json({ success: false, message: err.message });
       }
       if (result && result.length === 0) {
-        const insertQuery = `INSERT INTO patient_bills (uhid,	tp_id,	branch_name,	patient_name,	patient_mobile,	patient_email,	assigned_doctor_name,	total_amount, paid_amount, pay_by_sec_amt) VALUES (?,?,?,?,?,?,?,?, ?, ?)`;
+        const insertQuery = `INSERT INTO patient_bills (uhid,	tp_id,	branch_name,	patient_name,	patient_mobile,	patient_email,	assigned_doctor_name,	total_amount, paid_amount, pay_by_sec_amt, payment_status, bill_date) VALUES (?,?,?,?,?,?,?,?, ?, ?, ?, ?)`;
 
         const insertParams = [
           uhid,
@@ -588,6 +592,8 @@ const generateFinalBillwithTpid = (req, res) => {
           total_amount,
           paid_amount,
           pay_by_sec_amt,
+          payment_status,
+          dateTime,
         ];
 
         db.query(insertQuery, insertParams, (err, result) => {
@@ -1061,7 +1067,7 @@ const getTreatmentDataList = (req, res) => {
   const tpid = req.params.tpid;
   const branch = req.params.branch;
 
-  const sql = `SELECT * FROM treat_suggest LEFT JOIN dental_examination ON dental_examination.tp_id = treat_suggest.tp_id WHERE treat_suggest.tp_id = ? AND treat_suggest.branch_name = ?`;
+  const sql = `SELECT * FROM treat_suggest LEFT JOIN dental_examination ON dental_examination.tp_id = treat_suggest.tp_id AND dental_examination.disease = treat_suggest.desease WHERE treat_suggest.tp_id = ? AND treat_suggest.branch_name = ?`;
 
   db.query(sql, [tpid, branch], (err, results) => {
     if (err) {
@@ -1121,6 +1127,74 @@ const insertTreatPrescriptionQuick = (req, res) => {
   );
 };
 
+const getTreatPrescriptionByAppointIdList = (req, res) => {
+  const tpid = req.params.tpid;
+
+  const sql = "SELECT * FROM dental_prescription WHERE tp_id = ?";
+
+  db.query(sql, tpid, (err, results) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.status(200).send(results);
+    }
+  });
+};
+
+const generateSittingBill = (req, res) => {
+  try {
+    const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
+    const tpid = req.params.tpid;
+    const branch = req.params.branch;
+    const {
+      sitting_number,
+      treatment,
+      teeth_number,
+      teeth_qty,
+      treatment_cost,
+      cost_per_qty,
+      discount,
+      final_cost,
+      sitting_amount,
+      pending_amount,
+      note,
+    } = req.body;
+    const insertQuery =
+      "INSERT INTO sitting_bill (tp_id, branch_name, sitting_number, treatment, teeth_number, teeth_qty, treatment_cost, cost_per_qty, discount, final_cost, sitting_amount, pending_amount, note, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const insertParams = [
+      tpid,
+      branch,
+      sitting_number,
+      treatment,
+      teeth_number,
+      teeth_qty,
+      treatment_cost,
+      cost_per_qty,
+      discount,
+      final_cost,
+      sitting_amount,
+      pending_amount,
+      note,
+      dateTime,
+    ];
+
+    db.query(insertQuery, insertParams, (err, result) => {
+      if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      } else {
+        return res.status(200).json({
+          success: true,
+          message: "sitting billing generated successfully",
+        });
+      }
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "internal server error" });
+  }
+};
+
 module.exports = {
   getTreatmentList,
   insertTreatmentData,
@@ -1159,4 +1233,6 @@ module.exports = {
   addChiefComplainTOList,
   getTreatmentDataList,
   insertTreatPrescriptionQuick,
+  getTreatPrescriptionByAppointIdList,
+  generateSittingBill,
 };

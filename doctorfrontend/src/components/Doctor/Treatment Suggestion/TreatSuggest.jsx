@@ -9,6 +9,7 @@ import { toggleTableRefresh } from "../../../redux/user/userSlice";
 import SuggestedtreatmentList from "../Examination/SaveExaminationData/SuggestedtreatmentList";
 import cogoToast from "cogo-toast";
 import { IoMdAdd } from "react-icons/io";
+import { FaPrescriptionBottleMedical } from "react-icons/fa6";
 
 const TreatSuggest = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const TreatSuggest = () => {
   const [treatments, setTreatments] = useState([]);
   const [getLabData, setGetLabData] = useState([]);
   const [getPatientData, setGetPatientData] = useState([]);
+  const [getTreatMedicine, setGetTreatMedicine] = useState([]);
   const [getTreatData, setGetTreatData] = useState([]);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [procedureTreat, setProcedureTreat] = useState([]);
@@ -499,7 +501,13 @@ const TreatSuggest = () => {
     getListTreatment();
   }, [refreshTable]);
 
-  console.log(treatList.length);
+  console.log(treatList);
+
+  const treatlistFilter = treatList?.filter((item) => {
+    return item.desease === prescriptionData?.disease;
+  });
+
+  console.log(treatlistFilter);
 
   const generatePres = () => {
     navigate(`/prescription-generate/${tpid}`);
@@ -515,6 +523,8 @@ const TreatSuggest = () => {
       console.log(error);
     }
   };
+
+  console.log(getTreatData);
 
   const fetchMedicineOptions = async () => {
     try {
@@ -603,6 +613,7 @@ const TreatSuggest = () => {
       addNewMedicine();
       // timelineForMedical();
       // getTreatPrescriptionByAppointId();
+      dispatch(toggleTableRefresh());
       setPrescriptionData({
         disease: "",
         treatment: "",
@@ -617,6 +628,57 @@ const TreatSuggest = () => {
       console.error("Error:", error.response.data);
       cogoToast.error("Error:", error.response.data);
       // Handle error, maybe show an error message
+    }
+  };
+
+  const getTreatPrescriptionByAppointId = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:8888/api/doctor/getTreatPrescriptionByAppointIdList/${tpid}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setGetTreatMedicine(data);
+      console.log(data);
+      // setGetSum(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(getTreatMedicine);
+
+  useEffect(() => {
+    getTreatPrescriptionByAppointId();
+  }, [refreshTable]);
+
+  const handledelete = async (id) => {
+    console.log(id);
+    try {
+      const confirmed = window.confirm("Are you sure you want to delete?"); // Show confirmation dialog
+
+      if (confirmed) {
+        const res = await axios.delete(
+          `http://localhost:8888/api/doctor/deleteTreatPrescriptionById/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(res.data); // Log response data
+
+        getTreatPrescriptionByAppointId();
+      }
+    } catch (error) {
+      console.log(error);
+      // Optionally, provide feedback to the user
+      cogoToast.error("An error occurred while deleting the item.");
     }
   };
 
@@ -1006,32 +1068,6 @@ const TreatSuggest = () => {
                 <div className="row">
                   <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
                     <div className="form-outline">
-                      <label>Treatment</label>
-                      <select
-                        className="form-select w-100"
-                        name="treatment"
-                        aria-label="Default select example"
-                        onChange={handleChangeMed}
-                        value={prescriptionData.treatment}
-                      >
-                        <option value="">-select treatment-</option>
-                        {getTreatData.map((item, index) => (
-                          <option key={index} value={item.treatment_name}>
-                            {item.treatment_name}
-                          </option>
-                        ))}
-                      </select>
-                      {/* <input
-                        type="text"
-                        // value={treatment}
-                        readOnly
-                        className="rounded"
-                        required
-                      /> */}
-                    </div>
-                  </div>
-                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
-                    <div className="form-outline">
                       <label>disease</label>
                       <select
                         name="disease"
@@ -1049,6 +1085,34 @@ const TreatSuggest = () => {
                       </select>
                     </div>
                   </div>
+                  <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
+                    <div className="form-outline">
+                      <label>Treatment</label>
+                      <select
+                        className="form-select w-100"
+                        name="treatment"
+                        required
+                        aria-label="Default select example"
+                        onChange={handleChangeMed}
+                        value={prescriptionData.treatment}
+                      >
+                        <option value="">-select treatment-</option>
+                        {treatlistFilter.map((item, index) => (
+                          <option key={index} value={item.treatment_name}>
+                            {item.treatment_name}
+                          </option>
+                        ))}
+                      </select>
+                      {/* <input
+                        type="text"
+                        // value={treatment}
+                        readOnly
+                        className="rounded"
+                        required
+                      /> */}
+                    </div>
+                  </div>
+
                   <div className="col-xxl-2 col-xl-3 col-lg-3 col-md-4 col-sm-6 col-6">
                     <div className="form-outline">
                       <label>Medicine Name</label>
@@ -1199,6 +1263,48 @@ const TreatSuggest = () => {
             </div>
           </div>
 
+          <div className="container">
+            <div className="row">
+              <table class="table">
+                <thead className="rounded">
+                  <tr>
+                    <th className="colorth">Date</th>
+                    <th className="colorth">Medicine Name</th>
+                    <th className="colorth">Dosage</th>
+                    <th className="colorth">Frequency</th>
+                    <th className="colorth">Duration</th>
+                    <th className="colorth">Note</th>
+                    <th className="colorth">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getTreatMedicine?.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.date?.split(" ")[0]}</td>
+                      <td>{item.medicine_name}</td>
+                      <td>{item.dosage}</td>
+                      <td>{item.frequency}</td>
+                      <td>{item.duration}</td>
+                      <td>{item.note}</td>
+                      <td>
+                        <button
+                          className="btn btn-danger text-white shadow"
+                          style={{
+                            backgroundColor: "#0dcaf0",
+                            border: "#0dcaf0",
+                          }}
+                          onClick={() => handledelete(item.id)}
+                        >
+                          <FaPrescriptionBottleMedical size={22} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div className="d-flex justify-content-center align-items-center">
             {treatList.length > 0 ? (
               <>
@@ -1207,7 +1313,7 @@ const TreatSuggest = () => {
                   className="btn btn-info text-light shadow fw-bold"
                   onClick={generatePres}
                 >
-                  Generate Prescription
+                  Print Prescription
                 </button>
                 <button
                   className="btn btn-info text-light mx-2 shadow fw-bold"
@@ -1223,7 +1329,7 @@ const TreatSuggest = () => {
                   className="btn btn-info text-light shadow fw-bold"
                   disabled
                 >
-                  Generate Prescription
+                  Print Prescription
                 </button>
                 <button
                   className="btn btn-info text-light mx-2 shadow fw-bold"
@@ -1271,5 +1377,9 @@ const Wrapper = styled.div`
     font-weight: 500;
     font-size: 1.2rem;
     padding: 0.5rem 0rem;
+  }
+  .colorth {
+    background-color: #0dcaf0;
+    color: white;
   }
 `;

@@ -318,7 +318,7 @@ const ExaminationPatientTest = ({ tpid }) => {
     patient_uhid: null,
     selectTeeth: [],
     disease: "",
-    chiefComplain: "",
+    chiefComplain: null,
     advice: "",
     onExamination: "",
     diagnosis_category: dcat,
@@ -1058,7 +1058,7 @@ const ExaminationPatientTest = ({ tpid }) => {
         appointment_id: id,
         selectTeeth: [],
         disease: "",
-        chiefComplain: "",
+        chiefComplain: null,
         advice: "",
         onExamination: "",
       });

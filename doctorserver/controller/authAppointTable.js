@@ -53,9 +53,9 @@ const getAppointmentsWithPatientDetails = (req, res) => {
 const getAppointmentsWithPatientDetailsById = (req, res) => {
   const tpid = req.params.tpid;
 
-  const sql = `SELECT * FROM treatment_package JOIN patient_details ON patient_details.uhid = treatment_package.uhid WHERE tp_id = ?`;
+  const sql = `SELECT * FROM treatment_package JOIN patient_details ON patient_details.uhid = treatment_package.uhid WHERE treatment_package.tp_id = ?`;
 
-  db.query(sql, [tpid], (err, result) => {
+  db.query(sql, tpid, (err, result) => {
     if (err) {
       console.error("Error executing query:", err.message);
       return res.status(500).json({ error: "Internal server error" });
@@ -863,6 +863,8 @@ const getOnlyExaminv = (req, res) => {
     res.status(500).json({ success: failed, message: "internal server error" });
   }
 };
+
+
 
 module.exports = {
   getAppointmentsWithPatientDetails,

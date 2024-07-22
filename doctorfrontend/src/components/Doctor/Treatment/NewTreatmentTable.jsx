@@ -154,6 +154,7 @@ const NewTreatmentTable = () => {
     due_amount:
       totalFinalBillValue - (totalPaidValue + totSecurityAmountUsedValue),
     pay_by_sec_amt: totSecurityAmountUsedValue,
+    payment_status: "pending",
   };
 
   console.log(billInputField);
@@ -199,7 +200,7 @@ const NewTreatmentTable = () => {
       setBillData(res.data);
       timelineForFinalBill();
       cogoToast.success("bill generated successfully");
-      navigate(`/ViewPatientTotalBill/${tpid}`);
+      navigate(`/doctor-dashboard`);
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -268,8 +269,9 @@ const NewTreatmentTable = () => {
                 <th>Treatment Cost</th>
                 <th>Cost * Qty</th>
                 <th>Discount %</th>
+
                 <th>Final Cost</th>
-                <th>Sitting Paid Amount</th>
+                <th>Sitting Amount</th>
                 <th>Note</th>
               </tr>
             </thead>
@@ -284,6 +286,7 @@ const NewTreatmentTable = () => {
                   <td>{item.total_amt}</td>
                   <td>{item.cost_amt}</td>
                   <td>{item.disc_amt}</td>
+
                   <td>{item.net_amount}</td>
                   <td>
                     {" "}
@@ -341,12 +344,12 @@ const NewTreatmentTable = () => {
                 onClick={generateFinalBill}
                 disabled={loading}
               >
-                {loading ? "Save & Continue..." : "Save & Continue"}{" "}
+                {loading ? "Complete Treatment..." : "Complete Treatment"}{" "}
                 <FaLocationArrow size={25} />
               </button>
             ) : (
               <button className="btn btn-info fs-5 text-light" disabled>
-                Save & Continue <FaLocationArrow size={25} />
+                Complete Treatment <FaLocationArrow size={25} />
               </button>
             )}
           </div>

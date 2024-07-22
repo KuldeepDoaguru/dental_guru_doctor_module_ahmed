@@ -12,8 +12,9 @@ import moment from "moment";
 const NewTreatment = () => {
   const [patientDetails, setPatientDetails] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const { tpid, appoint_id } = useParams();
+  const { appoint_id, tpid } = useParams();
   console.log(appoint_id);
+  console.log(tpid);   
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedData, setSelectedData] = useState();
   const dispatch = useDispatch();

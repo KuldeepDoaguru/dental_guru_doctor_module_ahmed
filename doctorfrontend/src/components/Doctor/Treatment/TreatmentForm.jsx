@@ -110,6 +110,10 @@ const TreatmentForm = () => {
   const dataArray = totalTeeth?.split(", ").map(Number);
   console.log(dataArray?.length);
 
+  console.log(lastTreatment?.pending_amount);
+  console.log(lastTreatment?.paid_amount);
+  console.log(lastTreatment?.current_sitting);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -149,6 +153,8 @@ const TreatmentForm = () => {
   useEffect(() => {
     discountError();
   }, [formData.disc_amt]);
+
+  console.log(lastTreatment?.pending_amount);
 
   const showError = () => {
     if (lastTreatment?.pending_amount < formData.paid_amount) {
@@ -446,6 +452,45 @@ const TreatmentForm = () => {
     }
   };
 
+  const sittingForm = {
+    sitting_number: lastTreatment?.current_sitting,
+    treatment: treatment,
+    teeth_number: lastTreatment?.selected_teeth,
+    teeth_qty: dataArray?.length,
+    treatment_cost: lastTreatment?.totalCost,
+    cost_per_qty: lastTreatment?.totalCost * dataArray?.length,
+    discount:
+      lastTreatment?.current_sitting <= 1
+        ? formData.disc_amt
+        : lastTreatment?.disc_amt <= 0
+        ? formData.disc_amt === ""
+          ? 0
+          : formData.disc_amt
+        : lastTreatment?.disc_amt,
+    final_cost:
+      lastTreatment?.paid_amount > 0
+        ? lastTreatment?.pending_amount
+        : rawNetAmount,
+    sitting_amount: formData.paid_amount,
+    pending_amount:
+      lastTreatment?.paid_amount > 0
+        ? lastTreatment?.pending_amount - formData.paid_amount
+        : rawNetAmount - formData.paid_amount,
+    note: formData.note,
+  };
+
+  const generateBillSitting = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8888/api/doctor/generateSittingBill/${tp_id}/${branch}`,
+        sittingForm
+      );
+      cogoToast.success("sitting bill generate successfully");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -463,6 +508,7 @@ const TreatmentForm = () => {
         timelineForTreatForm();
         console.log("Treatment details inserted successfully");
         // Optionally, you can reset the form fields after successful submission
+        generateBillSitting();
         setFormData({
           no_teeth: "",
           qty: "",
@@ -475,13 +521,18 @@ const TreatmentForm = () => {
           note: "",
         });
         setLoading(false);
+
         treatmentStatsUpdate();
         getPatientDetail();
 
-        navigate(
-          `/TPrescriptionDash/${tsid}/${appoint_id}/${tp_id}/${lastTreatment?.current_sitting}/${treatment}`
-        );
-        // navigate(`/TreatmentDashBoard/${appoint_id}/${tp_id}`);
+        // navigate(
+        //   `/TPrescriptionDash/${tsid}/${appoint_id}/${tp_id}/${lastTreatment?.current_sitting}/${treatment}`
+        // );
+
+        // navigate(
+        //   `/ViewPatientSittingBill/${tp_id}/${lastTreatment?.current_sitting}/${treatment}`
+        // );
+        navigate(`/TreatmentDashBoard/${tp_id}/${appoint_id}`);
       } else {
         setLoading(false);
         console.error(
@@ -846,7 +897,7 @@ const TreatmentForm = () => {
                       />
                     </div>
                   </div>
-                  {/* <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
+                  <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Treatment cost per tooth
@@ -860,8 +911,8 @@ const TreatmentForm = () => {
                         onChange={handleChange}
                       />
                     </div>
-                  </div> */}
-                  {/* <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
+                  </div>
+                  <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Total Treatment Cost
@@ -875,8 +926,8 @@ const TreatmentForm = () => {
                         // onChange={handleChange}
                       />
                     </div>
-                  </div> */}
-                  {/* <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-sm-12 col-12">
+                  </div>
+                  <div className="col-xxl-3 col-xl-3 col-lg-2 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
                         Discount %{" "}
@@ -914,8 +965,8 @@ const TreatmentForm = () => {
                         </>
                       )}
                     </div>
-                  </div> */}
-                  {/* {lastTreatment?.current_sitting <= 1 ? (
+                  </div>
+                  {lastTreatment?.current_sitting <= 1 ? (
                     ""
                   ) : (
                     <>
@@ -930,12 +981,12 @@ const TreatmentForm = () => {
                         </p>
                       </div>
                     </>
-                  )} */}
+                  )}
 
-                  {/* <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-sm-12 col-12">
+                  <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-4 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">
-                        Paid Amount
+                        Sitting Amount
                       </label>
 
                       {showDirect ? (
@@ -946,7 +997,7 @@ const TreatmentForm = () => {
                           className="shadow-none p-1 bg-light rounded border-0 w-75"
                           value={formData.paid_amount}
                           readOnly
-                          placeholder="Paid Amount"
+                          placeholder="Sitting Amount"
                           onChange={handleChange}
                         />
                       ) : (
@@ -957,7 +1008,7 @@ const TreatmentForm = () => {
                             name="paid_amount"
                             className="shadow-none p-1 bg-light rounded border-0 w-75"
                             value={formData.paid_amount}
-                            placeholder="Paid Amount"
+                            placeholder="Sitting Amount"
                             onChange={handleChange}
                           />
                         </>
@@ -971,7 +1022,7 @@ const TreatmentForm = () => {
                           : lastTreatment?.pending_amount - secRecValue}
                       </small>
                     </div>
-                  </div> */}
+                  </div>
                   <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
                     <div class="mb-3">
                       <label htmlFor="" class="form-label fw-bold">

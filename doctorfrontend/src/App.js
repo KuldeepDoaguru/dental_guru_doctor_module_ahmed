@@ -36,6 +36,7 @@ import Lottie from "lottie-react";
 import PrescriptionDetails from "./pages/DoctorPage/PrescriptionDetails";
 import ViewTreatPrescriptionList from "./components/Doctor/Prescription/TreatmentPrescription/ViewTreatPrescriptionList";
 import PrescriptionQuick from "./pages/DoctorPage/PrescriptionQuick";
+import SittingBill from "./components/Doctor/Treatment/SittingBill";
 
 function App() {
   const navigate = useNavigate();
@@ -742,6 +743,29 @@ function App() {
               <AttendanceLeave />
             ) : (
               <PrescriptionQuick />
+            )
+          }
+        />
+
+        <Route
+          path="/ViewPatientSittingBill/:tpid/:sitting/:treatment"
+          element={
+            user === null ? (
+              <DoctorLogin />
+            ) : loading ? (
+              <>
+                {" "}
+                <Lottie
+                  options={defaultOptions}
+                  height={300}
+                  width={400}
+                  style={{ background: "transparent" }}
+                ></Lottie>
+              </>
+            ) : todayAttendance.length === 0 ? (
+              <AttendanceLeave />
+            ) : (
+              <SittingBill />
             )
           }
         />

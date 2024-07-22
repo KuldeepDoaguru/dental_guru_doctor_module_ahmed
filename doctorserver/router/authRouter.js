@@ -109,6 +109,8 @@ const {
   addChiefComplainTOList,
   getTreatmentDataList,
   insertTreatPrescriptionQuick,
+  getTreatPrescriptionByAppointIdList,
+  generateSittingBill,
 } = require("../controller/authTreatment.js");
 const {
   uploadImage,
@@ -566,5 +568,10 @@ router.post(
   "/insertTreatPrescriptionQuick/:tpid",
   insertTreatPrescriptionQuick
 );
+router.get(
+  "/getTreatPrescriptionByAppointIdList/:tpid",
+  getTreatPrescriptionByAppointIdList
+);
+router.post("/generateSittingBill/:tpid/:branch", generateSittingBill);
 
 module.exports = { authRoutes: router };

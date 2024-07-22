@@ -139,6 +139,31 @@ const PrescriptionQuick = () => {
     }
   };
 
+  const getTreatPrescriptionByAppointId = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:8888/api/doctor/getTreatPrescriptionByAppointIdList/${tpid}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setGetTreatMedicine(data);
+      console.log(data);
+      // setGetSum(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(getTreatMedicine);
+
+  useEffect(() => {
+    getTreatPrescriptionByAppointId();
+  }, []);
+
   return (
     <>
       <Wrapper>
@@ -348,15 +373,16 @@ const PrescriptionQuick = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <React.Fragment>
-                      <tr>
-                        <td>medicine_name</td>
-                        <td>dosage</td>
-                        <td>frequency</td>
-                        <td>duration</td>
-                        <td>note</td>
+                    {getTreatMedicine?.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.date?.split(" ")[0]}</td>
+                        <td>{item.medicine_name}</td>
+                        <td>{item.dosage}</td>
+                        <td>{item.frequency}</td>
+                        <td>{item.duration}</td>
+                        <td>{item.note}</td>
                       </tr>
-                    </React.Fragment>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -369,7 +395,7 @@ const PrescriptionQuick = () => {
                   <h4>Patient's signature</h4>
                 </div>
               </div>
-              <div className="text-center">
+              <div className="text-center mb-5">
                 {/* <button
                   className="btn btn-success no-print mx-3 mb-3 mt-2 no-print"
                   onClick={handleButton}
@@ -382,7 +408,7 @@ const PrescriptionQuick = () => {
                 >
                   Appointment Dashboard
                 </button> */}
-                <button
+                {/* <button
                   className="btn btn-info no-print mx-3 mb-3 mt-2 text-white shadow"
                   style={{
                     backgroundColor: "#0dcaf0",
@@ -391,7 +417,7 @@ const PrescriptionQuick = () => {
                   //   onClick={handleTreatNavigattion}
                 >
                   Treatment Dashboard
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
