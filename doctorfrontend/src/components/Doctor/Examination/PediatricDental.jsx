@@ -203,6 +203,7 @@ const PediatricDentalTest = ({ tpid }) => {
   console.log(tpid);
   const [loading, setLoading] = useState(false);
   const { id, dcat } = useParams();
+  const [otherList, setOtherList] = useState(false);
   console.log(id);
   const [selectedTeeth, setSelectedTeeth] = useState([]);
   const [teethShow, setTeethShow] = useState();
@@ -220,6 +221,7 @@ const PediatricDentalTest = ({ tpid }) => {
   const [selectAllTeeth, setSelectAllTeeth] = useState(false);
   const [isFormFilled, setIsFormFilled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [chiefList, setChielfList] = useState([]);
   const [getPatientData, setGetPatientData] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
@@ -227,6 +229,25 @@ const PediatricDentalTest = ({ tpid }) => {
   const token = user.currentUser.token;
   console.log(branch);
   const navigate = useNavigate();
+
+  const handleChiefListChange = () => {
+    setOtherList(!otherList);
+  };
+
+  const getChiefList = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:8888/api/doctor/getChiefComplain`
+      );
+      setChielfList(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getChiefList();
+  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -758,6 +779,26 @@ const PediatricDentalTest = ({ tpid }) => {
     diagnosis_category: dcat,
   };
 
+  const updateAppointmentData = async () => {
+    try {
+      const res = await axios.put(
+        `http://localhost:8888/api/doctor/updateAppointmentPath/${id}/${branch}`,
+        {
+          currentPath: `/ExaminationDashBoardPediatric/${id}/${dcat}/${tpid}`,
+          tpid: tpid,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   console.log(formData);
   const handleSave = async (e) => {
     e.preventDefault();
@@ -777,6 +818,7 @@ const PediatricDentalTest = ({ tpid }) => {
       );
       setLoading(false);
       console.log(response.data);
+      updateAppointmentData();
       cogoToast.success("data saved");
       dispatch(toggleTableRefresh());
       timelineForExamination();
@@ -1316,7 +1358,14 @@ const PediatricDentalTest = ({ tpid }) => {
                     <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6 col-sm-6 col-6">
                       <div data-mdb-input-init class="form-outline">
                         <label className="lable">Cheif Complaint</label>
-                        <input
+                        <button
+                          className="btn btn-info text-light mx-3"
+                          onClick={handleChiefListChange}
+                          type="button"
+                        >
+                          {otherList ? "Complain List" : "Other complain"}
+                        </button>
+                        {/* <input
                           type="text"
                           name="chiefComplain"
                           onChange={handleSelecteditem}
@@ -1325,7 +1374,43 @@ const PediatricDentalTest = ({ tpid }) => {
                           id="form8Example3"
                           class="form-control"
                           placeholder="Cheif Complaints"
-                        />
+                        /> */}
+                        {!otherList ? (
+                          <>
+                            {" "}
+                            <select
+                              name="chiefComplain"
+                              onChange={handleSelecteditem}
+                              // value={inputItem.chiefComplain}
+                              required
+                              id="form8Example3"
+                              class="form-control"
+                              placeholder="Cheif Complaints"
+                            >
+                              <option value="">-select-</option>
+                              {chiefList?.map((item) => (
+                                <>
+                                  <option value={item.chief_complain}>
+                                    {item.chief_complain}
+                                  </option>
+                                </>
+                              ))}
+                            </select>
+                          </>
+                        ) : (
+                          <>
+                            <input
+                              type="text"
+                              name="chiefComplain"
+                              onChange={handleSelecteditem}
+                              value={inputItem.chiefComplain}
+                              required
+                              id="form8Example3"
+                              class="form-control"
+                              placeholder="write cheif complaints..."
+                            />
+                          </>
+                        )}
                       </div>
                     </div>
                     <div class="col-xxl-4 col-xl-4 col-lg-4 col-md-6 col-sm-6 col-6">

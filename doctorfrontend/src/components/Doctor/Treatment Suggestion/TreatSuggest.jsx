@@ -509,10 +509,6 @@ const TreatSuggest = () => {
 
   console.log(treatlistFilter);
 
-  const generatePres = () => {
-    navigate(`/prescription-generate/${tpid}`);
-  };
-
   const getTreatDetails = async () => {
     try {
       const { data } = await axios.get(
@@ -681,6 +677,69 @@ const TreatSuggest = () => {
       cogoToast.error("An error occurred while deleting the item.");
     }
   };
+
+  const totalTreatSuggest = () => {
+    try {
+      let total = 0;
+      treatList.forEach((item) => {
+        total = total + parseFloat(item.totalCost);
+      });
+      console.log(total);
+      return total;
+    } catch (error) {
+      console.log(error);
+      return 0;
+    }
+  };
+  const grandTotal = totalTreatSuggest();
+
+  console.log(grandTotal);
+
+  const formsCorrect = {
+    tp_id: tpid,
+    branch_name: branch,
+    appointment_id: id,
+    uhid: getPatientData[0]?.uhid,
+    patient_name: getPatientData[0]?.patient_name,
+    patient_number: getPatientData[0]?.mobileno,
+    treatment: "",
+    assigned_doctor: getPatientData[0]?.doctor_name,
+    amount: grandTotal,
+    remaining_amount: "",
+    payment_status: "pending",
+    payment_Mode: "",
+    transaction_Id: "",
+    received_by: "",
+  };
+
+  console.log(formsCorrect);
+
+  const insertCorrectData = async () => {
+    try {
+      const resp = await axios.post(
+        `http://localhost:8888/api/doctor/addSecurityAmount`,
+        formsCorrect,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log(resp.data);
+      updateAppointmentData();
+      dispatch(toggleTableRefresh());
+      navigate(`/prescription-generate/${tpid}`);
+    } catch (error) {
+      console.log(error);
+      cogoToast.error(error.response.data.message);
+    }
+  };
+
+  // const generatePres = () => {
+  //   navigate(`/prescription-generate/${tpid}`);
+  // };
 
   return (
     <>
@@ -1311,7 +1370,7 @@ const TreatSuggest = () => {
                 <button
                   type="button"
                   className="btn btn-info text-light shadow fw-bold"
-                  onClick={generatePres}
+                  onClick={insertCorrectData}
                 >
                   Print Prescription
                 </button>

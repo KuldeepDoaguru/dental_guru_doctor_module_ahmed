@@ -476,6 +476,7 @@ const TreatmentForm = () => {
       lastTreatment?.paid_amount > 0
         ? lastTreatment?.pending_amount - formData.paid_amount
         : rawNetAmount - formData.paid_amount,
+    payment_status: "pending",
     note: formData.note,
   };
 

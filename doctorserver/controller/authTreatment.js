@@ -1157,10 +1157,11 @@ const generateSittingBill = (req, res) => {
       final_cost,
       sitting_amount,
       pending_amount,
+      payment_status,
       note,
     } = req.body;
     const insertQuery =
-      "INSERT INTO sitting_bill (tp_id, branch_name, sitting_number, treatment, teeth_number, teeth_qty, treatment_cost, cost_per_qty, discount, final_cost, sitting_amount, pending_amount, note, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      "INSERT INTO sitting_bill (tp_id, branch_name, sitting_number, treatment, teeth_number, teeth_qty, treatment_cost, cost_per_qty, discount, final_cost, sitting_amount, pending_amount, payment_status, note, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     const insertParams = [
       tpid,
       branch,
@@ -1174,6 +1175,7 @@ const generateSittingBill = (req, res) => {
       final_cost,
       sitting_amount,
       pending_amount,
+      payment_status,
       note,
       dateTime,
     ];

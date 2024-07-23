@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../connect.js");
 const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
+const moment = require("moment-timezone");
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -93,6 +94,7 @@ const upDateAppointmentStatus = (req, res) => {
 };
 
 const addSecurityAmount = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   try {
     const {
       tp_id,
@@ -118,7 +120,7 @@ const addSecurityAmount = (req, res) => {
     const insertParams = [
       tp_id,
       branch_name,
-      date,
+      dateTime,
       appointment_id,
       uhid,
       patient_name,
@@ -137,19 +139,29 @@ const addSecurityAmount = (req, res) => {
       refund_by,
     ];
 
-    const querySecurity = `SELECT * FROM security_amount WHERE sa_id = ? AND branch_name = ?`;
-
-    const selectQuery =
-      "INSERT INTO security_amount (tp_id, branch_name, date, appointment_id, uhid, patient_name, patient_number, treatment, assigned_doctor, amount, remaining_amount, payment_status, payment_Mode, transaction_Id, payment_date, refund_amount, refund_date, received_by, refund_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?)";
-
-    db.query(selectQuery, insertParams, (err, result) => {
+    const querySecurity = `SELECT * FROM security_amount WHERE tp_id = ? AND branch_name = ?`;
+    db.query(querySecurity, [tp_id, branch_name], (err, result) => {
       if (err) {
         res.status(400).json({ success: false, message: err.message });
       }
-      res.status(200).json({
-        success: true,
-        message: "Security Amount Submitted Successfully",
-      });
+      if (result.length > 0) {
+        res
+          .status(400)
+          .json({ success: false, message: "security amount already added" });
+      } else {
+        const selectQuery =
+          "INSERT INTO security_amount (tp_id, branch_name, date, appointment_id, uhid, patient_name, patient_number, treatment, assigned_doctor, amount, remaining_amount, payment_status, payment_Mode, transaction_Id, payment_date, refund_amount, refund_date, received_by, refund_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?, ?)";
+
+        db.query(selectQuery, insertParams, (err, result) => {
+          if (err) {
+            res.status(400).json({ success: false, message: err.message });
+          }
+          res.status(200).json({
+            success: true,
+            message: "Security Amount Submitted Successfully",
+          });
+        });
+      }
     });
   } catch (error) {
     console.log(error);
@@ -863,8 +875,6 @@ const getOnlyExaminv = (req, res) => {
     res.status(500).json({ success: failed, message: "internal server error" });
   }
 };
-
-
 
 module.exports = {
   getAppointmentsWithPatientDetails,
