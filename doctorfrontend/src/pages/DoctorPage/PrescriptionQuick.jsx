@@ -362,9 +362,13 @@ const PrescriptionQuick = () => {
               </div>
               <div className="Medicine">
                 <p className="text-start fs-4 fw-bold">Medicine Details</p>
-                <table className="table table-bordered border">
+              </div>
+
+              <div className="table-responsive">
+                <table className="table table-bordered table-striped border">
                   <thead>
                     <tr>
+                      <th>Date</th>
                       <th>Medicine Name</th>
                       <th>Dosage</th>
                       <th>Frequency</th>
@@ -374,14 +378,16 @@ const PrescriptionQuick = () => {
                   </thead>
                   <tbody>
                     {getTreatMedicine?.map((item, index) => (
-                      <tr key={index}>
-                        <td>{item.date?.split(" ")[0]}</td>
-                        <td>{item.medicine_name}</td>
-                        <td>{item.dosage}</td>
-                        <td>{item.frequency}</td>
-                        <td>{item.duration}</td>
-                        <td>{item.note}</td>
-                      </tr>
+                      <>
+                        <tr key={index + 1}>
+                          <td>{item.date?.split(" ")[0]}</td>
+                          <td>{item.medicine_name}</td>
+                          <td>{item.dosage}</td>
+                          <td>{item.frequency}</td>
+                          <td>{item.duration}</td>
+                          <td>{item.note}</td>
+                        </tr>
+                      </>
                     ))}
                   </tbody>
                 </table>

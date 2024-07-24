@@ -14,7 +14,7 @@ const NewTreatment = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { appoint_id, tpid } = useParams();
   console.log(appoint_id);
-  console.log(tpid);   
+  console.log(tpid);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [selectedData, setSelectedData] = useState();
   const dispatch = useDispatch();
@@ -398,9 +398,7 @@ const NewTreatment = () => {
                           <td>{patient.branch_name}</td>
                           <td>{patient.assigned_doctor_name}</td>
                           <td>{patient.lab_name}</td>
-                          <td>
-                            {moment(patient.created_date).format("DD/MM/YYYY")}
-                          </td>
+                          <td>{patient.created_date?.split(" ")[0]}</td>
                           <td>{patient.test}</td>
                           <td
                             className="fw-bold text-capitalize"

@@ -598,6 +598,7 @@ const getTreatPackageViaTpidUhid = (req, res) => {
 };
 
 const insertLab = (req, res) => {
+  const dateTime = moment().tz("Asia/Kolkata").format("DD-MM-YYYY HH:mm:ss");
   try {
     const {
       tpid,
@@ -618,8 +619,8 @@ const insertLab = (req, res) => {
       }
       if (result.length === 0) {
         // Insert data into the MySQL table
-        const sql = `INSERT INTO patient_lab_details (tpid, patient_uhid, patient_name, branch_name, assigned_doctor_name, lab_name, test) 
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO patient_lab_details (tpid, patient_uhid, patient_name, branch_name, assigned_doctor_name, lab_name, test, created_date) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
         const values = [
           tpid,
           patient_uhid,
@@ -628,6 +629,7 @@ const insertLab = (req, res) => {
           assigned_doctor_name,
           lab_name,
           test,
+          dateTime,
         ];
 
         db.query(sql, values, (err, result) => {

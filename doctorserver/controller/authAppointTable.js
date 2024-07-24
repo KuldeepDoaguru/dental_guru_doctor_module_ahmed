@@ -694,7 +694,7 @@ const getExaminedataByIdandexamineAfterSitOne = (req, res) => {
     //   "SELECT * FROM dental_examination JOIN treat_suggest ON dental_examination.tp_id = treat_suggest.tp_id && dental_examination.disease = treat_suggest.desease WHERE treat_suggest.ts_id = ? AND treat_suggest.tp_id = ?";
     const selectQuery = `
 SELECT * FROM treat_suggest
-JOIN dental_examination ON treat_suggest.tp_id = dental_examination.tp_id 
+JOIN dental_examination ON treat_suggest.desease = dental_examination.disease
 JOIN dental_treatment ON treat_suggest.ts_id = dental_treatment.exam_id 
 WHERE treat_suggest.ts_id = ? AND treat_suggest.tp_id = ?`;
     db.query(selectQuery, [tsid, tpid], (err, result) => {
